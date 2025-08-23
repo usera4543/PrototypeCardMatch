@@ -9,7 +9,7 @@ public class AudioManager : MonoBehaviour
     void Awake()
     {
         if (I != null && I != this) { Destroy(gameObject); return; }
-        I = this; DontDestroyOnLoad(gameObject);
+        I = this;
         src = gameObject.AddComponent<AudioSource>();
     }
 
