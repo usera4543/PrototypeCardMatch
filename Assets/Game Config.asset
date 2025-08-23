@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: Game Config
   m_EditorClassIdentifier: 
   rows: 2
-  cols: 3
-  seed: 0
+  cols: 4
   flipDuration: 0.25
   compareDelay: 0.6
   matchScore: 100
   mismatchPenalty: 10
-  palette: []

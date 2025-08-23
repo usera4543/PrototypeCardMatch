@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
@@ -12,9 +13,24 @@ public class GameManager : Singleton<GameManager>
     [Header("Card Visual Sprite Content")]
     [SerializeField] List<Sprite> cardSprites = new List<Sprite>(); // assign in Inspector
 
+
+
+    [Header("HUD References")]
+    [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private TMP_Text movesText;
+    [SerializeField] private TMP_Text matchesText;
+    [SerializeField] private TMP_Text highScoreText;
+
+    [Header("GameOver UI Panel")]
+    [SerializeField] private GameObject gameOverPanel;
+
+    //Runtime States
     // ordered symbol ids for the board
-    List<int> deckSymbols;    
+    List<int> deckSymbols;
     List<Card> faceUpUnmatched = new List<Card>();
+    int score;
+    int moves;
+    int matches;
 
     void OnEnable()
     {
@@ -39,6 +55,14 @@ public class GameManager : Singleton<GameManager>
             Debug.LogError($"Invalid layout {rows}x{cols}. Must have an even number of cards.");
             return; // stop
         }
+
+        // reset runtime state
+        score = 0;
+        moves = 0;
+        matches = 0;
+        UpdateHUD();
+        gameOverPanel.SetActive(false);
+
 
         // Build a deck: pairs of symbol indices, then shuffle
         int pairs = total / 2;
@@ -103,11 +127,18 @@ public class GameManager : Singleton<GameManager>
     {
         yield return new WaitForSeconds(config.compareDelay);
 
+        //Runtime state
+        moves++;
+
         if (a == null || b == null) yield break;
         if (a.symbolId == b.symbolId)
         {
             a.SetMatched();
             b.SetMatched();
+
+            //Runtime state
+            matches++;
+            score += config.matchScore;
 
             //Play Match SFX
             audioManager.PlayMatch();
@@ -122,8 +153,23 @@ public class GameManager : Singleton<GameManager>
 
             StartCoroutine(a.FlipToBack(0.05f));
             StartCoroutine(b.FlipToBack(0.05f));
+
+            //Runtime state
+            score = Mathf.Max(0, score - config.mismatchPenalty);//Penalize
+
             GameSignals.OnCardsMismatched?.Invoke(a, b);
         }
+        //Update HUD
+        UpdateHUD();
+    }
+
+
+    //UI Handling
+    void UpdateHUD()
+    {
+        scoreText.text = $"Score: {score}";
+        movesText.text = $"Moves: {moves}";
+        matchesText.text = $"Matches: {matches}";
     }
 
 }
