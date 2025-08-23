@@ -26,16 +26,24 @@ public class GameManager : Singleton<GameManager>
     }
     void Start()
     {
-        NewGame(4, 4); // Testing
+        // using values from ScriptableObject
+        NewGame(config.rows, config.cols);
     }
 
     public void NewGame(int rows, int cols)
     {
-        spawner.rows = rows;
-        spawner.cols = cols;
+        int total = rows * cols;
+        if (total % 2 != 0)
+        {
+            Debug.LogError($"Invalid layout {rows}x{cols}. Must have an even number of cards.");
+            return; // stop
+        }
+
+        //spawner.rows = rows;
+        //spawner.cols = cols;
 
         // Build a deck: pairs of symbol indices, then shuffle
-        int pairs = (rows * cols) / 2;
+        int pairs = total / 2;
         deckSymbols = BuildDeck(pairs);
 
         // Check to ensure we have enough sprites
@@ -43,7 +51,7 @@ public class GameManager : Singleton<GameManager>
             Debug.LogWarning($"Not enough face sprites. Need {pairs}, have {cardSprites.Count}.");
 
         // Spawn cards from pool
-        spawner.BuildGrid(deckSymbols, cardSprites, config.flipDuration);
+        spawner.BuildGrid(rows, cols, deckSymbols, cardSprites, config.flipDuration);
     }
     List<int> BuildDeck(int pairs)
     {

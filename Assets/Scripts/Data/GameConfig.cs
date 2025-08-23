@@ -5,7 +5,7 @@ public class GameConfig : ScriptableObject
 {
     [Header("Board")]
     public int rows = 2;
-    public int cols = 2;
+    public int cols = 3;
     public int seed = 0;
 
     [Header("Timings")]
@@ -15,7 +15,4 @@ public class GameConfig : ScriptableObject
     [Header("Scoring")]
     public int matchScore = 100;
     public int mismatchPenalty = 10;
-
-    [Header("Misc")]
-    public Color[] palette;
 }
