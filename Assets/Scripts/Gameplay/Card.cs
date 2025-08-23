@@ -10,7 +10,7 @@ public class Card : MonoBehaviour, IPoolable
     public int symbolId;
     public float flipDuration = 0.25f;
 
-    public CardState State { get; private set; } = CardState.FaceDown;
+    public CardState State = CardState.FaceDown;
 
     Button button;
     RectTransform rt;

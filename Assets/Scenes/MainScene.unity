@@ -456,6 +456,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1045658525}
+  - component: {fileID: 1045658526}
   m_Layer: 0
   m_Name: PoolManager
   m_TagString: Untagged
@@ -478,6 +479,23 @@ Transform:
   m_Father: {fileID: 2131905903}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1045658526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045658524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2e306d5ad6376344a1599de667c0968, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pools:
+  - key: Card
+    prefab: {fileID: 6620670906092734146, guid: 18ab011ab11d829419a32a9146ae0c19, type: 3}
+    initialSize: 10
+    expandable: 1
 --- !u!1 &1178927354
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,6 +639,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1331869309}
+  - component: {fileID: 1331869310}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -643,6 +662,29 @@ Transform:
   m_Father: {fileID: 2131905903}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1331869310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1331869308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2158ef2807a96d846b88befc08b33cda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawner: {fileID: 1408573304}
+  config: {fileID: 11400000, guid: b4f50bddddd76f04f876e2b041194c5c, type: 2}
+  cardSprites:
+  - {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!1 &1408573300
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,6 +696,7 @@ GameObject:
   - component: {fileID: 1408573301}
   - component: {fileID: 1408573303}
   - component: {fileID: 1408573302}
+  - component: {fileID: 1408573304}
   m_Layer: 5
   m_Name: GameArea Panel
   m_TagString: Untagged
@@ -719,6 +762,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1408573300}
   m_CullTransparentMesh: 1
+--- !u!114 &1408573304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1408573300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a0fd4ba5ac8984b9c10a3efbfd341b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameArea: {fileID: 1408573301}
+  rows: 4
+  cols: 4
+  spacing: 8
+  poolKey: Card
 --- !u!1 &1768976427
 GameObject:
   m_ObjectHideFlags: 0
