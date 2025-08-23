@@ -347,7 +347,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &872147505
@@ -505,6 +505,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1178927355}
+  - component: {fileID: 1178927356}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -527,6 +528,22 @@ Transform:
   m_Father: {fileID: 2131905903}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1178927356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178927354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1f44678b9c02304eba1a7157c742a8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flipClip: {fileID: 8300000, guid: 1d69535a0203a964aa4bb7b88ac436ab, type: 3}
+  matchClip: {fileID: 8300000, guid: 62540c3a49f6c2a469147fa86cd0d6b4, type: 3}
+  mismatchClip: {fileID: 8300000, guid: 87ac742427ef1f444aee8dc09a8b9e60, type: 3}
+  gameOverClip: {fileID: 8300000, guid: dbb5cafdb3015af4eac069241577d9a3, type: 3}
 --- !u!1 &1280994727
 GameObject:
   m_ObjectHideFlags: 0
@@ -676,6 +693,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawner: {fileID: 1408573304}
   config: {fileID: 11400000, guid: b4f50bddddd76f04f876e2b041194c5c, type: 2}
+  audioManager: {fileID: 1178927356}
   cardSprites:
   - {fileID: 21300000, guid: a0754d163121e934ebc1f74401570966, type: 3}
   - {fileID: 21300000, guid: f38f16306aa2c7846821e6729c4c5551, type: 3}
@@ -697,7 +715,7 @@ GameObject:
   - component: {fileID: 1408573303}
   - component: {fileID: 1408573304}
   m_Layer: 5
-  m_Name: GameArea Panel
+  m_Name: GameArea Panel + GridSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -744,8 +762,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameArea: {fileID: 1408573301}
-  rows: 4
-  cols: 4
   spacing: 8
   poolKey: Card
 --- !u!1 &1768976427
@@ -783,7 +799,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1768976429

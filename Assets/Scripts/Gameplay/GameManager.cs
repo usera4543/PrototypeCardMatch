@@ -7,6 +7,7 @@ public class GameManager : Singleton<GameManager>
     [Header("References")]
     public GridSpawner spawner;
     public GameConfig config;
+    public AudioManager audioManager;
 
     [Header("Card Visual Sprite Content")]
     [SerializeField] List<Sprite> cardSprites = new List<Sprite>(); // assign in Inspector
@@ -39,9 +40,6 @@ public class GameManager : Singleton<GameManager>
             return; // stop
         }
 
-        //spawner.rows = rows;
-        //spawner.cols = cols;
-
         // Build a deck: pairs of symbol indices, then shuffle
         int pairs = total / 2;
         deckSymbols = BuildDeck(pairs);
@@ -68,6 +66,9 @@ public class GameManager : Singleton<GameManager>
 
     void HandleCardFlip(Card card)
     {
+        //Play flip SFX
+        audioManager.PlayFlip();
+
         lock (faceUpUnmatched)
         {
             if (!faceUpUnmatched.Contains(card) && card.State == CardState.FaceUp)
@@ -107,11 +108,18 @@ public class GameManager : Singleton<GameManager>
         {
             a.SetMatched();
             b.SetMatched();
+
+            //Play Match SFX
+            audioManager.PlayMatch();
+
             GameSignals.OnCardsMatched?.Invoke(a, b);
             if (spawner.RemainingActiveCards() == 0) GameSignals.OnGameOver?.Invoke();
         }
         else
         {
+            //Play Mismatch SFX
+            audioManager.PlayMismatch();
+
             StartCoroutine(a.FlipToBack(0.05f));
             StartCoroutine(b.FlipToBack(0.05f));
             GameSignals.OnCardsMismatched?.Invoke(a, b);
