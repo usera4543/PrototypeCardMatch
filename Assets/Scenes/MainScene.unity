@@ -677,14 +677,14 @@ MonoBehaviour:
   spawner: {fileID: 1408573304}
   config: {fileID: 11400000, guid: b4f50bddddd76f04f876e2b041194c5c, type: 2}
   cardSprites:
-  - {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 21300000, guid: a0754d163121e934ebc1f74401570966, type: 3}
+  - {fileID: 21300000, guid: f38f16306aa2c7846821e6729c4c5551, type: 3}
+  - {fileID: 21300000, guid: f3784ca307d93614a9f475131d954a73, type: 3}
+  - {fileID: 21300000, guid: 1861f25b5a563a04485390a781dba042, type: 3}
+  - {fileID: 21300000, guid: f49f6189feb589345a79c3f84507ca34, type: 3}
+  - {fileID: 21300000, guid: 9a36a6d8470b4d449a2fe20506ad68fa, type: 3}
+  - {fileID: 21300000, guid: f323d09e13d239948ab91d1a152927c9, type: 3}
+  - {fileID: 21300000, guid: a2056da05e4a3024eb1605136278b801, type: 3}
 --- !u!1 &1408573300
 GameObject:
   m_ObjectHideFlags: 0
@@ -938,7 +938,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2131905902}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.604398, y: 5.961201, z: -0.08519437}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
