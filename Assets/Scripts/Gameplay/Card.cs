@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+public enum CardState { FaceDown, Flipping, FaceUp, InComparison, Matched }
+
 [RequireComponent(typeof(Button))]
 public class Card : MonoBehaviour, IPoolable
 {
@@ -110,12 +112,6 @@ public class Card : MonoBehaviour, IPoolable
         GameSignals.OnCardMatchedDisabled?.Invoke(this);
     }
 
-    // IPoolable
-    public void OnTakeFromPool()
-    {
-        // When get from pool
-    }
-
     public void OnReturnToPool()
     {
         // cleanup
@@ -129,4 +125,3 @@ public class Card : MonoBehaviour, IPoolable
     }
 }
 
-public enum CardState { FaceDown, Flipping, FaceUp, InComparison, Matched }

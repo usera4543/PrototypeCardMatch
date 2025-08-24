@@ -33,8 +33,6 @@ public class ObjectPool
         GameObject go = (stack.Count > 0) ? stack.Pop() : (expandable ? CreateNew() : null);
         if (go == null) return null;
         go.SetActive(true);
-        var poolable = go.GetComponent<IPoolable>();
-        poolable?.OnTakeFromPool();
         return go;
     }
 
