@@ -14,4 +14,10 @@ public class GameConfig : ScriptableObject
     [Header("Scoring")]
     public int matchScore = 100;
     public int mismatchPenalty = 10;
+
+    [Header("Restart Range")]
+    public int minRows = 2;
+    public int maxRows = 4;
+    public int minCols = 2;
+    public int maxCols = 4;
 }

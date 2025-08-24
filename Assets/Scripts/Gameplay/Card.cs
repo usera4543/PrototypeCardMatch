@@ -102,7 +102,12 @@ public class Card : MonoBehaviour, IPoolable
             yield return null;
         }
         transform.localScale = Vector3.zero;
-        // card stays inactive; caller should Return to pool
+
+        // card stays inactive
+        gameObject.SetActive(false);
+
+        //Notify game signal
+        GameSignals.OnCardMatchedDisabled?.Invoke(this);
     }
 
     // IPoolable

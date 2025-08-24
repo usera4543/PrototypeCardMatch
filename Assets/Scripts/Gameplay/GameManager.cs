@@ -13,8 +13,6 @@ public class GameManager : Singleton<GameManager>
     [Header("Card Visual Sprite Content")]
     [SerializeField] List<Sprite> cardSprites = new List<Sprite>(); // assign in Inspector
 
-
-
     [Header("HUD References")]
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text movesText;
@@ -31,18 +29,25 @@ public class GameManager : Singleton<GameManager>
     int score;
     int moves;
     int matches;
+    int highScore;
+    const string HighScoreKey = "HighScore"; // PlayerPrefs Save
 
     void OnEnable()
     {
         GameSignals.OnCardFlipped += HandleCardFlip;
+        GameSignals.OnCardMatchedDisabled += HandleCardDisabled;
     }
 
     void OnDisable()
     {
         GameSignals.OnCardFlipped -= HandleCardFlip;
+        GameSignals.OnCardMatchedDisabled -= HandleCardDisabled;
     }
     void Start()
     {
+        // load persistent high score
+        highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+
         // using values from ScriptableObject
         NewGame(config.rows, config.cols);
     }
@@ -100,7 +105,11 @@ public class GameManager : Singleton<GameManager>
         }
         TryStartComparisons();
     }
-
+    void HandleCardDisabled(Card card)
+    {
+        if (spawner.RemainingActiveCards() == 0)
+            OnGameOver();
+    }
     void TryStartComparisons()
     {
         lock (faceUpUnmatched)
@@ -144,7 +153,7 @@ public class GameManager : Singleton<GameManager>
             audioManager.PlayMatch();
 
             GameSignals.OnCardsMatched?.Invoke(a, b);
-            if (spawner.RemainingActiveCards() == 0) GameSignals.OnGameOver?.Invoke();
+
         }
         else
         {
@@ -170,6 +179,37 @@ public class GameManager : Singleton<GameManager>
         scoreText.text = $"Score: {score}";
         movesText.text = $"Moves: {moves}";
         matchesText.text = $"Matches: {matches}";
+        highScoreText.text = $"High Score: {highScore}";
     }
+    void OnGameOver()
+    {
+        Debug.Log("SSS");
+        // check for new high score
+        if (score > highScore)
+        {
+            highScore = score;
+            PlayerPrefs.SetInt(HighScoreKey, highScore);
+            PlayerPrefs.Save(); // persist immediately
+        }
+
+        gameOverPanel.SetActive(true);
+        GameSignals.OnGameOver?.Invoke();
+    }
+
+    // called by restart button in GameOver panel OnClick event
+    public void RestartGameWithRandom()
+    {
+        int rows = Random.Range(config.minRows, config.maxRows + 1);
+        int cols = Random.Range(config.minCols, config.maxCols + 1);
+
+        // ensure even total
+        if ((rows * cols) % 2 != 0)
+        {
+            if (cols > config.minCols) cols--; else rows--;
+        }
+
+        NewGame(rows, cols);
+    }
+
 
 }

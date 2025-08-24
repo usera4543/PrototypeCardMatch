@@ -18,3 +18,7 @@ MonoBehaviour:
   compareDelay: 0.6
   matchScore: 100
   mismatchPenalty: 10
+  minRows: 2
+  maxRows: 4
+  minCols: 2
+  maxCols: 4
