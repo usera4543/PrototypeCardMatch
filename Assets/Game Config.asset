@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 429c1b5c2c97014499666ff21bd66b9f, type: 3}
   m_Name: Game Config
   m_EditorClassIdentifier: 
-  rows: 2
+  rows: 3
   cols: 4
   flipDuration: 0.25
-  compareDelay: 0.6
+  compareDelay: 0.4
   matchScore: 100
   mismatchPenalty: 10
   minRows: 2

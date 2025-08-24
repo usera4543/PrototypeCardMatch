@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Central game manager for the Memory Match game.
+/// Handles deck generation, scorekeeping, state transitions, and high score persistence.
+/// Follows Singleton pattern for global access.
+/// </summary>
 public class GameManager : Singleton<GameManager>
 {
     [Header("References")]
@@ -15,7 +20,8 @@ public class GameManager : Singleton<GameManager>
 
     // Runtime state
     private List<int> deckSymbols;
-    private List<Card> faceUpUnmatched = new List<Card>();
+    private readonly List<Card> faceUpUnmatched = new List<Card>();
+
     private int score;
     private int moves;
     private int matches;
@@ -23,29 +29,35 @@ public class GameManager : Singleton<GameManager>
 
     private const string HighScoreKey = "HighScore";
 
-    void OnEnable()
+    // ===================== UNITY LIFECYCLE =====================
+
+    private void OnEnable()
     {
         GameSignals.OnCardFlipped += HandleCardFlip;
         GameSignals.OnCardMatchedDisabled += HandleCardDisabled;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         GameSignals.OnCardFlipped -= HandleCardFlip;
         GameSignals.OnCardMatchedDisabled -= HandleCardDisabled;
     }
 
-    void Start()
+    private void Start()
     {
         // Load saved high score
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
 
         // Show start menu first
-        uiManager.ShowStart();
+        if (uiManager != null)
+            uiManager.ShowStart();
     }
 
     // ===================== GAME FLOW =====================
 
+    /// <summary>
+    /// Start a new game with a given grid layout.
+    /// </summary>
     public void StartNewGame(int rows, int cols)
     {
         int total = rows * cols;
@@ -59,8 +71,9 @@ public class GameManager : Singleton<GameManager>
         score = 0;
         moves = 0;
         matches = 0;
+        faceUpUnmatched.Clear();
 
-        uiManager.UpdateHUD(score, moves, matches, highScore);
+        uiManager?.UpdateHUD(score, moves, matches, highScore);
 
         // Build deck
         int pairs = total / 2;
@@ -69,11 +82,15 @@ public class GameManager : Singleton<GameManager>
         if (cardSprites.Count < pairs)
             Debug.LogWarning($"Not enough face sprites. Need {pairs}, have {cardSprites.Count}.");
 
-        spawner.BuildGrid(rows, cols, deckSymbols, cardSprites, config.flipDuration);
+        // Build the card grid
+        spawner?.BuildGrid(rows, cols, deckSymbols, cardSprites, config.flipDuration);
 
-        uiManager.ShowHUD();
+        uiManager?.ShowHUD();
     }
 
+    /// <summary>
+    /// Restart the game with a random valid grid layout.
+    /// </summary>
     public void RestartRandomGame()
     {
         int rows = Random.Range(config.minRows, config.maxRows + 1);
@@ -82,16 +99,21 @@ public class GameManager : Singleton<GameManager>
         // Ensure even number of cards
         if ((rows * cols) % 2 != 0)
         {
-            if (cols > config.minCols) cols--; else rows--;
+            if (cols > config.minCols) cols--;
+            else rows--;
         }
 
         StartNewGame(rows, cols);
     }
 
-    void OnGameOver()
+    /// <summary>
+    /// Called when all matches are found and the game ends.
+    /// </summary>
+    private void OnGameOver()
     {
-        audioManager.PlayGameOver();
+        audioManager?.PlayGameOver();
 
+        // Save new high score if beaten
         if (score > highScore)
         {
             highScore = score;
@@ -99,14 +121,15 @@ public class GameManager : Singleton<GameManager>
             PlayerPrefs.Save();
         }
 
-        uiManager.UpdateHUD(score, moves, matches, highScore);
-        uiManager.ShowGameOver();
-
-        GameSignals.OnGameOver?.Invoke();
+        uiManager?.UpdateHUD(score, moves, matches, highScore);
+        uiManager?.ShowGameOver();
     }
 
     // ===================== GAME LOGIC =====================
 
+    /// <summary>
+    /// Builds a shuffled deck of symbol IDs with pairs.
+    /// </summary>
     private List<int> BuildDeck(int pairs)
     {
         var list = new List<int>(pairs * 2);
@@ -116,7 +139,7 @@ public class GameManager : Singleton<GameManager>
             list.Add(i);
         }
 
-        // Shuffle
+        // Fisher-Yates shuffle
         for (int i = list.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
@@ -126,26 +149,38 @@ public class GameManager : Singleton<GameManager>
         return list;
     }
 
-    void HandleCardFlip(Card card)
+    /// <summary>
+    /// Handles when a card is flipped face-up.
+    /// </summary>
+    private void HandleCardFlip(Card card)
     {
-        audioManager.PlayFlip();
+        audioManager?.PlayFlip();
+
+        if (card == null || card.State != CardState.FaceUp)
+            return;
 
         lock (faceUpUnmatched)
         {
-            if (!faceUpUnmatched.Contains(card) && card.State == CardState.FaceUp)
+            if (!faceUpUnmatched.Contains(card))
                 faceUpUnmatched.Add(card);
         }
 
         TryStartComparisons();
     }
 
-    void HandleCardDisabled(Card card)
+    /// <summary>
+    /// Handles when a matched card is disabled.
+    /// </summary>
+    private void HandleCardDisabled(Card card)
     {
-        if (spawner.RemainingActiveCards() == 0)
+        if (spawner != null && spawner.RemainingActiveCards() == 0)
             OnGameOver();
     }
 
-    void TryStartComparisons()
+    /// <summary>
+    /// Checks if enough cards are flipped to start comparison.
+    /// </summary>
+    private void TryStartComparisons()
     {
         lock (faceUpUnmatched)
         {
@@ -154,18 +189,26 @@ public class GameManager : Singleton<GameManager>
                 var a = faceUpUnmatched[0];
                 var b = faceUpUnmatched[1];
 
+                if (a == null || b == null)
+                {
+                    faceUpUnmatched.RemoveRange(0, 2);
+                    continue;
+                }
+
                 a.State = CardState.InComparison;
                 b.State = CardState.InComparison;
 
-                faceUpUnmatched.RemoveAt(0);
-                faceUpUnmatched.RemoveAt(0);
+                faceUpUnmatched.RemoveRange(0, 2);
 
                 StartCoroutine(ComparePair(a, b));
             }
         }
     }
 
-    IEnumerator ComparePair(Card a, Card b)
+    /// <summary>
+    /// Coroutine to compare two flipped cards with a delay.
+    /// </summary>
+    private IEnumerator ComparePair(Card a, Card b)
     {
         yield return new WaitForSeconds(config.compareDelay);
 
@@ -181,12 +224,12 @@ public class GameManager : Singleton<GameManager>
             matches++;
             score += config.matchScore;
 
-            audioManager.PlayMatch();
+            audioManager?.PlayMatch();
             GameSignals.OnCardsMatched?.Invoke(a, b);
         }
         else
         {
-            audioManager.PlayMismatch();
+            audioManager?.PlayMismatch();
 
             StartCoroutine(a.FlipToBack(0.05f));
             StartCoroutine(b.FlipToBack(0.05f));
@@ -195,12 +238,12 @@ public class GameManager : Singleton<GameManager>
             GameSignals.OnCardsMismatched?.Invoke(a, b);
         }
 
-        uiManager.UpdateHUD(score, moves, matches, highScore);
+        uiManager?.UpdateHUD(score, moves, matches, highScore);
     }
 
     // ===================== UI BUTTON HOOKS =====================
 
     public void OnPlayButton() => StartNewGame(config.rows, config.cols);
     public void OnRestartButton() => RestartRandomGame();
-    public void OnHomeButton() => uiManager.ShowStart();
+    public void OnHomeButton() => uiManager?.ShowStart();
 }
