@@ -1,36 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
     [Header("References")]
-    public GridSpawner spawner;
-    public GameConfig config;
-    public AudioManager audioManager;
+    [SerializeField] private GridSpawner spawner;
+    [SerializeField] private GameConfig config;
+    [SerializeField] private AudioManager audioManager;
+    [SerializeField] private UIManager uiManager;
 
     [Header("Card Visual Sprite Content")]
-    [SerializeField] List<Sprite> cardSprites = new List<Sprite>(); // assign in Inspector
+    [SerializeField] private List<Sprite> cardSprites = new List<Sprite>();
 
-    [Header("HUD References")]
-    [SerializeField] private TMP_Text scoreText;
-    [SerializeField] private TMP_Text movesText;
-    [SerializeField] private TMP_Text matchesText;
-    [SerializeField] private TMP_Text highScoreText;
+    // Runtime state
+    private List<int> deckSymbols;
+    private List<Card> faceUpUnmatched = new List<Card>();
+    private int score;
+    private int moves;
+    private int matches;
+    private int highScore;
 
-    [Header("GameOver UI Panel")]
-    [SerializeField] private GameObject gameOverPanel;
-
-    //Runtime States
-    // ordered symbol ids for the board
-    List<int> deckSymbols;
-    List<Card> faceUpUnmatched = new List<Card>();
-    int score;
-    int moves;
-    int matches;
-    int highScore;
-    const string HighScoreKey = "HighScore"; // PlayerPrefs Save
+    private const string HighScoreKey = "HighScore";
 
     void OnEnable()
     {
@@ -43,59 +34,100 @@ public class GameManager : Singleton<GameManager>
         GameSignals.OnCardFlipped -= HandleCardFlip;
         GameSignals.OnCardMatchedDisabled -= HandleCardDisabled;
     }
+
     void Start()
     {
-        // load persistent high score
+        // Load saved high score
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
 
-        // using values from ScriptableObject
-        NewGame(config.rows, config.cols);
+        // Show start menu first
+        uiManager.ShowStart();
     }
 
-    public void NewGame(int rows, int cols)
+    // ===================== GAME FLOW =====================
+
+    public void StartNewGame(int rows, int cols)
     {
         int total = rows * cols;
         if (total % 2 != 0)
         {
             Debug.LogError($"Invalid layout {rows}x{cols}. Must have an even number of cards.");
-            return; // stop
+            return;
         }
 
-        // reset runtime state
+        // Reset runtime state
         score = 0;
         moves = 0;
         matches = 0;
-        UpdateHUD();
-        gameOverPanel.SetActive(false);
 
+        uiManager.UpdateHUD(score, moves, matches, highScore);
 
-        // Build a deck: pairs of symbol indices, then shuffle
+        // Build deck
         int pairs = total / 2;
         deckSymbols = BuildDeck(pairs);
 
-        // Check to ensure we have enough sprites
         if (cardSprites.Count < pairs)
             Debug.LogWarning($"Not enough face sprites. Need {pairs}, have {cardSprites.Count}.");
 
-        // Spawn cards from pool
         spawner.BuildGrid(rows, cols, deckSymbols, cardSprites, config.flipDuration);
+
+        uiManager.ShowHUD();
     }
-    List<int> BuildDeck(int pairs)
+
+    public void RestartRandomGame()
+    {
+        int rows = Random.Range(config.minRows, config.maxRows + 1);
+        int cols = Random.Range(config.minCols, config.maxCols + 1);
+
+        // Ensure even number of cards
+        if ((rows * cols) % 2 != 0)
+        {
+            if (cols > config.minCols) cols--; else rows--;
+        }
+
+        StartNewGame(rows, cols);
+    }
+
+    void OnGameOver()
+    {
+        audioManager.PlayGameOver();
+
+        if (score > highScore)
+        {
+            highScore = score;
+            PlayerPrefs.SetInt(HighScoreKey, highScore);
+            PlayerPrefs.Save();
+        }
+
+        uiManager.UpdateHUD(score, moves, matches, highScore);
+        uiManager.ShowGameOver();
+
+        GameSignals.OnGameOver?.Invoke();
+    }
+
+    // ===================== GAME LOGIC =====================
+
+    private List<int> BuildDeck(int pairs)
     {
         var list = new List<int>(pairs * 2);
-        for (int i = 0; i < pairs; i++) { list.Add(i); list.Add(i); }
+        for (int i = 0; i < pairs; i++)
+        {
+            list.Add(i);
+            list.Add(i);
+        }
+
         // Shuffle
         for (int i = list.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
+
         return list;
     }
 
     void HandleCardFlip(Card card)
     {
-        //Play flip SFX
         audioManager.PlayFlip();
 
         lock (faceUpUnmatched)
@@ -103,24 +135,25 @@ public class GameManager : Singleton<GameManager>
             if (!faceUpUnmatched.Contains(card) && card.State == CardState.FaceUp)
                 faceUpUnmatched.Add(card);
         }
+
         TryStartComparisons();
     }
+
     void HandleCardDisabled(Card card)
     {
         if (spawner.RemainingActiveCards() == 0)
             OnGameOver();
     }
+
     void TryStartComparisons()
     {
         lock (faceUpUnmatched)
         {
-            // as long as two face-up unmatched exist, pair them FIFO
             while (faceUpUnmatched.Count >= 2)
             {
                 var a = faceUpUnmatched[0];
                 var b = faceUpUnmatched[1];
 
-                // mark as in comparison
                 a.State = CardState.InComparison;
                 b.State = CardState.InComparison;
 
@@ -136,80 +169,38 @@ public class GameManager : Singleton<GameManager>
     {
         yield return new WaitForSeconds(config.compareDelay);
 
-        //Runtime state
         moves++;
 
         if (a == null || b == null) yield break;
+
         if (a.symbolId == b.symbolId)
         {
             a.SetMatched();
             b.SetMatched();
 
-            //Runtime state
             matches++;
             score += config.matchScore;
 
-            //Play Match SFX
             audioManager.PlayMatch();
-
             GameSignals.OnCardsMatched?.Invoke(a, b);
-
         }
         else
         {
-            //Play Mismatch SFX
             audioManager.PlayMismatch();
 
             StartCoroutine(a.FlipToBack(0.05f));
             StartCoroutine(b.FlipToBack(0.05f));
 
-            //Runtime state
-            score = Mathf.Max(0, score - config.mismatchPenalty);//Penalize
-
+            score = Mathf.Max(0, score - config.mismatchPenalty);
             GameSignals.OnCardsMismatched?.Invoke(a, b);
         }
-        //Update HUD
-        UpdateHUD();
+
+        uiManager.UpdateHUD(score, moves, matches, highScore);
     }
 
+    // ===================== UI BUTTON HOOKS =====================
 
-    //UI Handling
-    void UpdateHUD()
-    {
-        scoreText.text = $"Score: {score}";
-        movesText.text = $"Moves: {moves}";
-        matchesText.text = $"Matches: {matches}";
-        highScoreText.text = $"High Score: {highScore}";
-    }
-    void OnGameOver()
-    {
-        Debug.Log("SSS");
-        // check for new high score
-        if (score > highScore)
-        {
-            highScore = score;
-            PlayerPrefs.SetInt(HighScoreKey, highScore);
-            PlayerPrefs.Save(); // persist immediately
-        }
-
-        gameOverPanel.SetActive(true);
-        GameSignals.OnGameOver?.Invoke();
-    }
-
-    // called by restart button in GameOver panel OnClick event
-    public void RestartGameWithRandom()
-    {
-        int rows = Random.Range(config.minRows, config.maxRows + 1);
-        int cols = Random.Range(config.minCols, config.maxCols + 1);
-
-        // ensure even total
-        if ((rows * cols) % 2 != 0)
-        {
-            if (cols > config.minCols) cols--; else rows--;
-        }
-
-        NewGame(rows, cols);
-    }
-
-
+    public void OnPlayButton() => StartNewGame(config.rows, config.cols);
+    public void OnRestartButton() => RestartRandomGame();
+    public void OnHomeButton() => uiManager.ShowStart();
 }
