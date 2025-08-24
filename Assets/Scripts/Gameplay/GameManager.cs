@@ -124,6 +124,17 @@ public class GameManager : Singleton<GameManager>
         uiManager?.UpdateHUD(score, moves, matches, highScore);
         uiManager?.ShowGameOver();
     }
+    private void ClearAllPlayerPrefs()
+    {
+        PlayerPrefs.DeleteAll();  // removes ALL saved keys
+        PlayerPrefs.Save();
+        // Reset runtime values
+        highScore = 0;
+        score = 0;
+        moves = 0;
+        matches = 0;
+
+    }
 
     // ===================== GAME LOGIC =====================
 
@@ -246,4 +257,6 @@ public class GameManager : Singleton<GameManager>
     public void OnPlayButton() => StartNewGame(config.rows, config.cols);
     public void OnRestartButton() => RestartRandomGame();
     public void OnHomeButton() => uiManager?.ShowStart();
+
+    public void OnClearHighScoreButton() => ClearAllPlayerPrefs();
 }
