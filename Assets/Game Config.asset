@@ -19,6 +19,6 @@ MonoBehaviour:
   matchScore: 100
   mismatchPenalty: 10
   minRows: 2
-  maxRows: 4
+  maxRows: 6
   minCols: 2
-  maxCols: 4
+  maxCols: 6

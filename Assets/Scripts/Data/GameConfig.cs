@@ -7,11 +7,11 @@ public class GameConfig : ScriptableObject
 
     [Header("Start Game On Play Button -> (Customize as required)")]
     [Tooltip("Number of rows for the initial game board. Can be adjusted with slider.")]
-    [Range(2, 4)] // Set min/max as required
+    [Range(2, 6)] // Set min/max as required
     public int rows = 2;
 
     [Tooltip("Number of columns for the initial game board. Can be adjusted with slider.")]
-    [Range(2, 4)] // Set min/max as required
+    [Range(2, 6)] // Set min/max as required
     public int cols = 3;
 
 
@@ -40,11 +40,11 @@ public class GameConfig : ScriptableObject
     public int minRows = 2;
 
     [Tooltip("Maximum rows allowed for random board.")]
-    public int maxRows = 4;
+    public int maxRows = 6;
 
     [Tooltip("Minimum columns allowed for random board.")]
     public int minCols = 2;
 
     [Tooltip("Maximum columns allowed for random board.")]
-    public int maxCols = 4;
+    public int maxCols = 6;
 }
